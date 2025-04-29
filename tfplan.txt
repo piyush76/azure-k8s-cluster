@@ -1,0 +1,345 @@
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  + create
+ <= read (data resources)
+
+Terraform will perform the following actions:
+
+  # module.aks.azurerm_kubernetes_cluster.aks will be created
+  + resource "azurerm_kubernetes_cluster" "aks" {
+      + current_kubernetes_version          = (known after apply)
+      + dns_prefix                          = "ics-dev-aks-cluster"
+      + fqdn                                = (known after apply)
+      + http_application_routing_zone_name  = (known after apply)
+      + id                                  = (known after apply)
+      + kube_admin_config                   = (sensitive value)
+      + kube_admin_config_raw               = (sensitive value)
+      + kube_config                         = (sensitive value)
+      + kube_config_raw                     = (sensitive value)
+      + kubernetes_version                  = (known after apply)
+      + location                            = "centralus"
+      + name                                = "ics-dev-aks-cluster"
+      + node_os_upgrade_channel             = "NodeImage"
+      + node_resource_group                 = "ics-dev-aks-mrg"
+      + node_resource_group_id              = (known after apply)
+      + oidc_issuer_url                     = (known after apply)
+      + portal_fqdn                         = (known after apply)
+      + private_cluster_enabled             = false
+      + private_cluster_public_fqdn_enabled = false
+      + private_dns_zone_id                 = (known after apply)
+      + private_fqdn                        = (known after apply)
+      + resource_group_name                 = "ics-dev-aks-rg"
+      + role_based_access_control_enabled   = true
+      + run_command_enabled                 = true
+      + sku_tier                            = "Free"
+      + support_plan                        = "KubernetesOfficial"
+      + workload_identity_enabled           = false
+
+      + auto_scaler_profile (known after apply)
+
+      + default_node_pool {
+          + kubelet_disk_type    = (known after apply)
+          + max_pods             = 30
+          + name                 = "icsdevpool01"
+          + node_count           = 1
+          + node_labels          = (known after apply)
+          + orchestrator_version = (known after apply)
+          + os_disk_size_gb      = 128
+          + os_disk_type         = "Managed"
+          + os_sku               = (known after apply)
+          + scale_down_mode      = "Delete"
+          + type                 = "VirtualMachineScaleSets"
+          + ultra_ssd_enabled    = false
+          + vm_size              = "Standard_DS2_v2"
+          + vnet_subnet_id       = (known after apply)
+          + workload_runtime     = (known after apply)
+        }
+
+      + identity {
+          + principal_id = (known after apply)
+          + tenant_id    = (known after apply)
+          + type         = "SystemAssigned"
+        }
+
+      + ingress_application_gateway (known after apply)
+
+      + key_vault_secrets_provider {
+          + secret_identity          = (known after apply)
+          + secret_rotation_enabled  = true
+          + secret_rotation_interval = "30m"
+        }
+
+      + kubelet_identity (known after apply)
+
+      + network_profile {
+          + dns_service_ip     = "172.16.0.10"
+          + ip_versions        = (known after apply)
+          + load_balancer_sku  = "standard"
+          + network_data_plane = "azure"
+          + network_mode       = (known after apply)
+          + network_plugin     = "azure"
+          + network_policy     = "calico"
+          + outbound_type      = "loadBalancer"
+          + pod_cidr           = (known after apply)
+          + pod_cidrs          = (known after apply)
+          + service_cidr       = "172.16.0.0/16"
+          + service_cidrs      = (known after apply)
+
+          + load_balancer_profile (known after apply)
+
+          + nat_gateway_profile (known after apply)
+        }
+
+      + oms_agent (known after apply)
+
+      + windows_profile (known after apply)
+    }
+
+  # module.aks.azurerm_role_assignment.aks_network_contributor will be created
+  + resource "azurerm_role_assignment" "aks_network_contributor" {
+      + condition_version                = (known after apply)
+      + id                               = (known after apply)
+      + name                             = (known after apply)
+      + principal_id                     = (known after apply)
+      + principal_type                   = (known after apply)
+      + role_definition_id               = (known after apply)
+      + role_definition_name             = "Network Contributor"
+      + scope                            = (known after apply)
+      + skip_service_principal_aad_check = (known after apply)
+    }
+
+  # module.key_vault.data.azurerm_client_config.current will be read during apply
+  # (depends on a resource or a module with changes pending)
+ <= data "azurerm_client_config" "current" {
+      + client_id       = (known after apply)
+      + id              = (known after apply)
+      + object_id       = (known after apply)
+      + subscription_id = (known after apply)
+      + tenant_id       = (known after apply)
+    }
+
+  # module.key_vault.azurerm_key_vault.kv[0] will be created
+  + resource "azurerm_key_vault" "kv" {
+      + access_policy                 = (known after apply)
+      + enable_rbac_authorization     = true
+      + id                            = (known after apply)
+      + location                      = "centralus"
+      + name                          = "ics-dev-aks-cluster-kv"
+      + public_network_access_enabled = true
+      + purge_protection_enabled      = false
+      + resource_group_name           = "ics-dev-aks-rg"
+      + sku_name                      = "standard"
+      + soft_delete_retention_days    = 7
+      + tenant_id                     = (known after apply)
+      + vault_uri                     = (known after apply)
+
+      + contact (known after apply)
+
+      + network_acls (known after apply)
+    }
+
+  # module.monitoring.azurerm_log_analytics_solution.aks will be created
+  + resource "azurerm_log_analytics_solution" "aks" {
+      + id                    = (known after apply)
+      + location              = "centralus"
+      + resource_group_name   = "ics-dev-aks-rg"
+      + solution_name         = "ContainerInsights"
+      + workspace_name        = "ics-dev-aks-cluster-workspace"
+      + workspace_resource_id = (known after apply)
+
+      + plan {
+          + name      = (known after apply)
+          + product   = "OMSGallery/ContainerInsights"
+          + publisher = "Microsoft"
+        }
+    }
+
+  # module.monitoring.azurerm_log_analytics_workspace.aks will be created
+  + resource "azurerm_log_analytics_workspace" "aks" {
+      + allow_resource_only_permissions = true
+      + daily_quota_gb                  = -1
+      + id                              = (known after apply)
+      + internet_ingestion_enabled      = true
+      + internet_query_enabled          = true
+      + local_authentication_disabled   = false
+      + location                        = "centralus"
+      + name                            = "ics-dev-aks-cluster-workspace"
+      + primary_shared_key              = (sensitive value)
+      + resource_group_name             = "ics-dev-aks-rg"
+      + retention_in_days               = 30
+      + secondary_shared_key            = (sensitive value)
+      + sku                             = "PerGB2018"
+      + workspace_id                    = (known after apply)
+    }
+
+  # module.network.azurerm_application_gateway.app_gateway[0] will be created
+  + resource "azurerm_application_gateway" "app_gateway" {
+      + id                          = (known after apply)
+      + location                    = "centralus"
+      + name                        = "ics-dev-aks-cluster-appgw"
+      + private_endpoint_connection = (known after apply)
+      + resource_group_name         = "ics-dev-aks-rg"
+
+      + backend_address_pool {
+          + fqdns        = []
+          + id           = (known after apply)
+          + ip_addresses = []
+          + name         = "default-backend-pool"
+        }
+
+      + backend_http_settings {
+          + cookie_based_affinity               = "Disabled"
+          + id                                  = (known after apply)
+          + name                                = "http-settings"
+          + pick_host_name_from_backend_address = false
+          + port                                = 80
+          + probe_id                            = (known after apply)
+          + protocol                            = "Http"
+          + request_timeout                     = 30
+          + trusted_root_certificate_names      = []
+            # (4 unchanged attributes hidden)
+        }
+
+      + frontend_ip_configuration {
+          + id                            = (known after apply)
+          + name                          = "frontend-ip-config"
+          + private_ip_address            = (known after apply)
+          + private_ip_address_allocation = "Dynamic"
+          + private_link_configuration_id = (known after apply)
+          + public_ip_address_id          = (known after apply)
+        }
+
+      + frontend_port {
+          + id   = (known after apply)
+          + name = "http-port"
+          + port = 80
+        }
+      + frontend_port {
+          + id   = (known after apply)
+          + name = "https-port"
+          + port = 443
+        }
+
+      + gateway_ip_configuration {
+          + id        = (known after apply)
+          + name      = "appgw-ip-config"
+          + subnet_id = (known after apply)
+        }
+
+      + http_listener {
+          + frontend_ip_configuration_id   = (known after apply)
+          + frontend_ip_configuration_name = "frontend-ip-config"
+          + frontend_port_id               = (known after apply)
+          + frontend_port_name             = "http-port"
+          + host_names                     = []
+          + id                             = (known after apply)
+          + name                           = "http-listener"
+          + protocol                       = "Http"
+          + ssl_certificate_id             = (known after apply)
+          + ssl_profile_id                 = (known after apply)
+            # (4 unchanged attributes hidden)
+        }
+
+      + request_routing_rule {
+          + backend_address_pool_id     = (known after apply)
+          + backend_address_pool_name   = "default-backend-pool"
+          + backend_http_settings_id    = (known after apply)
+          + backend_http_settings_name  = "http-settings"
+          + http_listener_id            = (known after apply)
+          + http_listener_name          = "http-listener"
+          + id                          = (known after apply)
+          + name                        = "default-routing-rule"
+          + priority                    = 100
+          + redirect_configuration_id   = (known after apply)
+          + rewrite_rule_set_id         = (known after apply)
+          + rule_type                   = "Basic"
+          + url_path_map_id             = (known after apply)
+            # (3 unchanged attributes hidden)
+        }
+
+      + sku {
+          + capacity = 2
+          + name     = "Standard_v2"
+          + tier     = "Standard_v2"
+        }
+
+      + ssl_policy (known after apply)
+    }
+
+  # module.network.azurerm_public_ip.app_gateway_pip[0] will be created
+  + resource "azurerm_public_ip" "app_gateway_pip" {
+      + allocation_method       = "Static"
+      + ddos_protection_mode    = "VirtualNetworkInherited"
+      + fqdn                    = (known after apply)
+      + id                      = (known after apply)
+      + idle_timeout_in_minutes = 4
+      + ip_address              = (known after apply)
+      + ip_version              = "IPv4"
+      + location                = "centralus"
+      + name                    = "ics-dev-aks-cluster-appgw-pip"
+      + resource_group_name     = "ics-dev-aks-rg"
+      + sku                     = "Standard"
+      + sku_tier                = "Regional"
+    }
+
+  # module.network.azurerm_subnet.aks_subnet will be created
+  + resource "azurerm_subnet" "aks_subnet" {
+      + address_prefixes                              = [
+          + "10.61.6.32/28",
+        ]
+      + default_outbound_access_enabled               = true
+      + id                                            = (known after apply)
+      + name                                          = "ics-dev-aks-cluster-subnet"
+      + private_endpoint_network_policies             = "Disabled"
+      + private_link_service_network_policies_enabled = true
+      + resource_group_name                           = "ics-dev-aks-rg"
+      + virtual_network_name                          = "ics-dev-aks-cluster-vnet"
+    }
+
+  # module.network.azurerm_subnet.app_gateway_subnet[0] will be created
+  + resource "azurerm_subnet" "app_gateway_subnet" {
+      + address_prefixes                              = [
+          + "10.61.6.48/28",
+        ]
+      + default_outbound_access_enabled               = true
+      + id                                            = (known after apply)
+      + name                                          = "ics-dev-aks-cluster-appgw-subnet"
+      + private_endpoint_network_policies             = "Disabled"
+      + private_link_service_network_policies_enabled = true
+      + resource_group_name                           = "ics-dev-aks-rg"
+      + virtual_network_name                          = "ics-dev-aks-cluster-vnet"
+    }
+
+  # module.network.azurerm_virtual_network.aks_vnet will be created
+  + resource "azurerm_virtual_network" "aks_vnet" {
+      + address_space                  = [
+          + "10.61.6.32/27",
+        ]
+      + dns_servers                    = (known after apply)
+      + guid                           = (known after apply)
+      + id                             = (known after apply)
+      + location                       = "centralus"
+      + name                           = "ics-dev-aks-cluster-vnet"
+      + private_endpoint_vnet_policies = "Disabled"
+      + resource_group_name            = "ics-dev-aks-rg"
+      + subnet                         = (known after apply)
+    }
+
+  # module.resource_group.azurerm_resource_group.aks_rg will be created
+  + resource "azurerm_resource_group" "aks_rg" {
+      + id       = (known after apply)
+      + location = "centralus"
+      + name     = "ics-dev-aks-rg"
+    }
+
+Plan: 11 to add, 0 to change, 0 to destroy.
+
+Changes to Outputs:
+  + aks_cluster_id             = (known after apply)
+  + aks_cluster_name           = "ics-dev-aks-cluster"
+  + key_vault_id               = (known after apply)
+  + key_vault_uri              = (known after apply)
+  + kube_config                = (sensitive value)
+  + log_analytics_workspace_id = (known after apply)
+  + resource_group_name        = "ics-dev-aks-rg"
