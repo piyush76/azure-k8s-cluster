@@ -14,6 +14,11 @@ nodePoolName = "icsprodpool01"
 authorizedIPRanges = ["10.61.6.32/27"]
 ingressApplicationGateway = true
 
+# Ingress Controller
+ingressController = false
+ingressControllerType = "nginx"
+ingressControllerReplicas = 2
+
 # Monitoring
 omsagent = true
 retentionInDays = 90
