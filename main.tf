@@ -118,6 +118,7 @@ module "ingress_controller" {
 }
 
 module "dns_zone" {
+  count  = var.create_dns_zone ? 1 : 0
   source = "./modules/dns_zone"
   dns_zone_name       = var.dns_zone_name
   resource_group_name = module.resource_group.resource_group_name

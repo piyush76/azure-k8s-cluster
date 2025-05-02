@@ -30,4 +30,5 @@ keyVaultAksCSIPollInterval = "30m"
 
 # DNS
 dns_zone_name = "prod.apps.azure.incora.com"
+create_dns_zone = true
 environment = "prod"

@@ -106,6 +106,11 @@ variable "dns_zone_name" {
   description = "Name of the DNS zone to create"
 }
 
+variable "create_dns_zone" {
+  type        = bool
+  description = "Whether to create a DNS zone"
+}
+
 variable "environment" {
   type        = string
   description = "Environment name for tagging resources"
