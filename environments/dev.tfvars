@@ -14,6 +14,11 @@ nodePoolName = "icsdevpool01"
 authorizedIPRanges = ["10.61.6.32/27"]
 ingressApplicationGateway = false
 
+# Ingress Controller
+ingressController = true
+ingressControllerType = "nginx"
+ingressControllerReplicas = 2
+
 # Monitoring
 omsagent = true
 retentionInDays = 30

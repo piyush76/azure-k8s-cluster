@@ -80,6 +80,24 @@ variable "ingressApplicationGateway" {
   description = "Enable Application Gateway Ingress Controller"
 }
 
+variable "ingressController" {
+  type        = bool
+  default     = false
+  description = "Enable Kubernetes Ingress Controller (e.g., NGINX)"
+}
+
+variable "ingressControllerType" {
+  type        = string
+  default     = "nginx"
+  description = "Type of Ingress Controller to deploy (nginx, traefik, etc.)"
+}
+
+variable "ingressControllerReplicas" {
+  type        = number
+  default     = 2
+  description = "Number of replicas for the Ingress Controller"
+}
+
 variable "keyVaultAksCSI" {
   type        = bool
   default     = true

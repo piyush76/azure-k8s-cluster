@@ -24,6 +24,7 @@ These files contain pre-configured settings optimized for each environment:
 |---------|-------------|------------|
 | VM Size | Standard_DS2_v2 | Standard_D4s_v3 |
 | App Gateway | Disabled | Enabled |
+| NGINX Ingress | Enabled | Disabled |
 | Log Retention | 30 days | 90 days |
 | DNS Zone | dev.apps.azure.incora.com | prod.apps.azure.incora.com |
 
