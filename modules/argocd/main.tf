@@ -1,110 +1,238 @@
 
-resource "kubernetes_namespace" "argo" {
+provider "kubernetes" {
+}
+
+provider "helm" {
+}
+
+resource "kubernetes_namespace" "argocd" {
   metadata {
     name = var.namespace
-    labels = merge(
-      var.labels,
-      {
-        "app.kubernetes.io/name" = "argocd"
-        "app.kubernetes.io/part-of" = "argocd"
-      }
-    )
+    labels = var.namespace_labels
   }
-  }
+}
 
-/*resource "azurerm_dns_a_record" "argocd" {
-  name                = "argocd"
-  zone_name           = "argocd.incoraics.com"
-  resource_group_name = "my-dns-rg" ## Change to your DNS resource group currently not create for Incora ICS
-  ttl                 = 300
-  records             = ["64.236.68.84"]  # Use data lookup if dynamic
-}*/
-
-# Install ArgoCD using Helm
 resource "helm_release" "argocd" {
   name       = var.release_name
   repository = "https://argoproj.github.io/argo-helm"
   chart      = "argo-cd"
-  version    = var.argocd_chart_version
-  namespace  = kubernetes_namespace.argo.metadata[0].name
-
-  values = [
-    templatefile("${path.module}/argocd-values.yaml", {
-      service_type = var.service_type
-      insecure    = var.insecure
-      server_resources = var.server_resources
-      controller_resources = var.controller_resources
-      repo_server_resources = var.repo_server_resources
-      enable_ha = var.enable_ha
-      argocd_url = var.argocd_url
-      azure_client_id = var.azure_client_id
-      azure_client_secret = var.azure_client_secret
-      azure_tenant_id = var.azure_tenant_id
-    })
-  ]
+  version    = var.chart_version
+  namespace  = kubernetes_namespace.argocd.metadata[0].name
+  timeout    = var.helm_timeout
+  atomic     = var.helm_atomic
+  wait       = var.helm_wait
 
   set {
-    name  = "crds.install"
-    value = "false"
+    name  = "server.service.type"
+    value = var.server_service_type
   }
 
   dynamic "set" {
-    for_each = var.helm_values
+    for_each = var.server_service_type == "LoadBalancer" && var.server_service_annotations != {} ? [1] : []
     content {
-      name  = set.value.name
-      value = set.value.value
+      name  = "server.service.annotations"
+      value = yamlencode(var.server_service_annotations)
     }
   }
 
-  dynamic "set_sensitive" {
-    for_each = var.helm_sensitive_values
+  set {
+    name  = "server.extraArgs"
+    value = "{${join(",", [for k, v in var.server_extra_args : "\"${k}=${v}\""])}}"
+  }
+
+  dynamic "set" {
+    for_each = var.admin_password != "" ? [1] : []
     content {
-      name  = set_sensitive.value.name
-      value = set_sensitive.value.value
+      name  = "configs.secret.argocdServerAdminPassword"
+      value = var.admin_password_bcrypt ? var.admin_password : bcrypt(var.admin_password)
     }
   }
-  wait = var.wait_for_deployment
-  timeout = var.timeout
-  atomic     = false
 
-  depends_on = [kubernetes_namespace.argo]
+  set {
+    name  = "controller.replicas"
+    value = var.ha_enabled ? var.ha_controller_replicas : 1
+  }
 
+  set {
+    name  = "server.replicas"
+    value = var.ha_enabled ? var.ha_server_replicas : 1
+  }
+
+  set {
+    name  = "repoServer.replicas"
+    value = var.ha_enabled ? var.ha_repo_replicas : 1
+  }
+
+  set {
+    name  = "applicationSet.replicas"
+    value = var.ha_enabled ? var.ha_appset_replicas : 1
+  }
+
+  set {
+    name  = "server.resources.limits.cpu"
+    value = var.server_resources.limits.cpu
+  }
+
+  set {
+    name  = "server.resources.limits.memory"
+    value = var.server_resources.limits.memory
+  }
+
+  set {
+    name  = "server.resources.requests.cpu"
+    value = var.server_resources.requests.cpu
+  }
+
+  set {
+    name  = "server.resources.requests.memory"
+    value = var.server_resources.requests.memory
+  }
+
+  set {
+    name  = "redis.enabled"
+    value = var.ha_enabled
+  }
+
+  set {
+    name  = "server.ingress.enabled"
+    value = var.ingress_enabled
+  }
+
+  dynamic "set" {
+    for_each = var.ingress_enabled ? [1] : []
+    content {
+      name  = "server.ingress.hosts[0]"
+      value = var.ingress_hostname
+    }
+  }
+
+  dynamic "set" {
+    for_each = var.ingress_enabled && var.ingress_tls_enabled ? [1] : []
+    content {
+      name  = "server.ingress.tls[0].hosts[0]"
+      value = var.ingress_hostname
+    }
+  }
+
+  dynamic "set" {
+    for_each = var.ingress_enabled && var.ingress_tls_enabled ? [1] : []
+    content {
+      name  = "server.ingress.tls[0].secretName"
+      value = var.ingress_tls_secret_name
+    }
+  }
+
+  dynamic "set" {
+    for_each = var.ingress_enabled && var.ingress_annotations != {} ? [1] : []
+    content {
+      name  = "server.ingress.annotations"
+      value = yamlencode(var.ingress_annotations)
+    }
+  }
+
+  set {
+    name  = "server.rbacConfig.policy\\.csv"
+    value = var.rbac_policy
+  }
+
+  dynamic "set" {
+    for_each = var.config_override
+    content {
+      name  = "server.config.${set.key}"
+      value = set.value
+    }
+  }
+
+  dynamic "set" {
+    for_each = var.repositories
+    content {
+      name  = "configs.repositories.${set.key}.url"
+      value = set.value.url
+    }
+  }
+
+  dynamic "set" {
+    for_each = {
+      for k, v in var.repositories : k => v if lookup(v, "username", "") != "" && lookup(v, "password", "") != ""
+    }
+    content {
+      name  = "configs.repositories.${set.key}.usernameSecret.name" 
+      value = kubernetes_secret.repo_creds[set.key].metadata[0].name
+    }
+  }
+
+  dynamic "set" {
+    for_each = {
+      for k, v in var.repositories : k => v if lookup(v, "username", "") != "" && lookup(v, "password", "") != ""
+    }
+    content {
+      name  = "configs.repositories.${set.key}.usernameSecret.key"
+      value = "username"
+    }
+  }
+
+  dynamic "set" {
+    for_each = {
+      for k, v in var.repositories : k => v if lookup(v, "username", "") != "" && lookup(v, "password", "") != ""
+    }
+    content {
+      name  = "configs.repositories.${set.key}.passwordSecret.name"
+      value = kubernetes_secret.repo_creds[set.key].metadata[0].name
+    }
+  }
+
+  dynamic "set" {
+    for_each = {
+      for k, v in var.repositories : k => v if lookup(v, "username", "") != "" && lookup(v, "password", "") != ""
+    }
+    content {
+      name  = "configs.repositories.${set.key}.passwordSecret.key"
+      value = "password"
+    }
+  }
+
+  dynamic "set" {
+    for_each = var.extra_set_values
+    content {
+      name  = set.key
+      value = set.value
+    }
+  }
+
+  values = var.values_file != "" ? [file(var.values_file)] : []
 }
-resource "kubernetes_ingress_v1" "argocd" {
+
+resource "kubernetes_secret" "repo_creds" {
+  for_each = {
+    for k, v in var.repositories : k => v if lookup(v, "username", "") != "" && lookup(v, "password", "") != ""
+  }
+
   metadata {
-    name      = "argocd-ingress"
-    namespace = "argo"
-    annotations = {
-      "nginx.ingress.kubernetes.io/ssl-redirect" = "true"
-    }
+    name      = "argocd-repo-creds-${each.key}"
+    namespace = kubernetes_namespace.argocd.metadata[0].name
   }
 
-  spec {
-    rule {
-      host = "argocd.incoraics.com"
-
-      http {
-        path {
-          path     = "/"
-          path_type = "Prefix"
-
-          backend {
-            service {
-              name = "argocd-server"
-              port {
-                number = 443
-              }
-            }
-          }
-        }
-      }
-    }
-
-    tls {
-      hosts = ["argocd.incoraics.com"]
-      secret_name = "argocd-tls"
-    }
+  data = {
+    username = each.value.username
+    password = each.value.password
   }
+}
+
+resource "kubernetes_manifest" "applications" {
+  for_each = var.applications
+
+  manifest = {
+    apiVersion = "argoproj.io/v1alpha1"
+    kind       = "Application"
+    metadata = {
+      name      = each.key
+      namespace = kubernetes_namespace.argocd.metadata[0].name
+      finalizers = ["resources-finalizer.argocd.argoproj.io"]
+    }
+    spec = each.value
+  }
+
+  depends_on = [helm_release.argocd]
 }
 
 
