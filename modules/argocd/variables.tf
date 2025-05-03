@@ -46,7 +46,7 @@ variable "helm_wait" {
 variable "server_service_type" {
   description = "Kubernetes service type for ArgoCD server"
   type        = string
-  default     = "ClusterIP"
+  default     = "LoadBalancer"
 }
 
 variable "server_service_annotations" {
