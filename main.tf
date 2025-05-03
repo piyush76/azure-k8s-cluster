@@ -105,7 +105,20 @@ module "argocd" {
   service_type         = "LoadBalancer"
 }
 
+module "ingress_controller" {
+  count  = var.ingressController ? 1 : 0
+  source = "./modules/ingress_controller"
+  
+  namespace           = "ingress-system"
+  ingress_type        = var.ingressControllerType
+  replica_count       = var.ingressControllerReplicas
+  resource_group_name = module.resource_group.resource_group_name
+  
+  depends_on = [module.aks]
+}
+
 module "dns_zone" {
+  count  = var.create_dns_zone ? 1 : 0
   source = "./modules/dns_zone"
   dns_zone_name       = var.dns_zone_name
   resource_group_name = module.resource_group.resource_group_name
