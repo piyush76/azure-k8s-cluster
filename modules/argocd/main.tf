@@ -28,10 +28,10 @@ resource "helm_release" "argocd" {
   }
 
   dynamic "set" {
-    for_each = var.server_service_type == "LoadBalancer" && var.server_service_annotations != {} ? [1] : []
+    for_each = var.server_service_annotations != {} ? [1] : []
     content {
       name  = "server.service.annotations"
-      value = yamlencode(var.server_service_annotations)
+      value = jsonencode(var.server_service_annotations)
     }
   }
 
