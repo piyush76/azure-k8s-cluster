@@ -1,0 +1,30 @@
+# Template Configuration File
+# Copy this file to terraform.tfvars and customize as needed
+# Or use environment-specific files from the environments directory
+
+# Resource Group
+resourceGroupName = "ics-${env}-aks-rg"
+location = "centralus"  # Default location, override in environment files
+
+# AKS Cluster
+resourceName = "ics-${env}-aks-cluster"
+managedNodeResourceGroup = "ics-${env}-aks-mrg"
+SystemPoolType = "Standard_DS2_v2"  # Default size, override for production
+nodePoolName = "ics${env}pool01"
+
+# Network
+authorizedIPRanges = ["10.61.6.32/27"]
+ingressApplicationGateway = false  # Default to false, enable for production
+
+# Monitoring
+omsagent = true
+retentionInDays = 30  # Default retention, increase for production
+
+# Key Vault
+keyVaultAksCSI = true
+keyVaultCreate = true
+keyVaultAksCSIPollInterval = "30m"
+
+# DNS
+dns_zone_name = "${env}.apps.azure.incora.com"
+environment = "${env}"  # This should match TF_VAR_environment
