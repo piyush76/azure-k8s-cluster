@@ -40,6 +40,11 @@ resource "helm_release" "argocd" {
     value = "{${join(",", [for k, v in var.server_extra_args : "\"${k}=${v}\""])}}"
   }
 
+  set {
+    name  = "configs.secret.createSecret"
+    value = "true"
+  }
+
   dynamic "set" {
     for_each = var.admin_password != "" ? [1] : []
     content {
