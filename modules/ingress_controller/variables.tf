@@ -10,10 +10,9 @@ variable "ingress_type" {
   default     = "nginx"
 }
 
-variable "chart_version" {
-  description = "Helm chart version for the ingress controller"
+variable "aks_cluster_id" {
+  description = "The ID of the AKS cluster where the ingress controller will be deployed"
   type        = string
-  default     = "4.7.1"  # Use a stable version of nginx-ingress
 }
 
 variable "replica_count" {
