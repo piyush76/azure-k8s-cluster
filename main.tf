@@ -113,6 +113,7 @@ module "ingress_controller" {
   ingress_type        = var.ingressControllerType
   replica_count       = var.ingressControllerReplicas
   resource_group_name = module.resource_group.resource_group_name
+  aks_cluster_id      = module.aks.cluster_id
   
   depends_on = [module.aks]
 }
