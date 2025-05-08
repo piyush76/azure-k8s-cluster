@@ -4,50 +4,24 @@ resource "kubernetes_namespace" "ingress_system" {
   }
 }
 
-resource "helm_release" "ingress_controller" {
-  name       = "${var.ingress_type}-ingress"
-  repository = "https://kubernetes.github.io/ingress-nginx"
-  chart      = "ingress-nginx"
-  version    = var.chart_version
-  namespace  = kubernetes_namespace.ingress_system.metadata[0].name
-
-  set {
-    name  = "controller.replicaCount"
-    value = var.replica_count
+resource "azurerm_kubernetes_cluster_extension" "ingress_nginx" {
+  name                             = "ingress-nginx"
+  cluster_id                       = var.aks_cluster_id
+  extension_type                   = "microsoft.contoso/ingress-nginx"
+  release_train                    = "stable"
+  release_namespace                = kubernetes_namespace.ingress_system.metadata[0].name
+  configuration_settings = {
+    "controller.replicaCount"                = var.replica_count
+    "controller.service.type"                = var.service_type
+    "controller.ingressClassResource.name"   = var.ingress_type
+    "controller.ingressClassResource.default" = "true"
+    "controller.resources.requests.cpu"      = var.cpu_request
+    "controller.resources.requests.memory"   = var.memory_request
+    "controller.resources.limits.cpu"        = var.cpu_limit
+    "controller.resources.limits.memory"     = var.memory_limit
   }
 
-  set {
-    name  = "controller.service.type"
-    value = var.service_type
-  }
-
-  set {
-    name  = "controller.ingressClassResource.name"
-    value = var.ingress_type
-  }
-
-  set {
-    name  = "controller.ingressClassResource.default"
-    value = "true"
-  }
-
-  set {
-    name  = "controller.resources.requests.cpu"
-    value = var.cpu_request
-  }
-
-  set {
-    name  = "controller.resources.requests.memory"
-    value = var.memory_request
-  }
-
-  set {
-    name  = "controller.resources.limits.cpu"
-    value = var.cpu_limit
-  }
-
-  set {
-    name  = "controller.resources.limits.memory"
-    value = var.memory_limit
-  }
+  depends_on = [
+    kubernetes_namespace.ingress_system
+  ]
 }
