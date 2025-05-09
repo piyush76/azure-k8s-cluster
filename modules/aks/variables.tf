@@ -44,17 +44,6 @@ variable "authorized_ip_ranges" {
   description = "Authorized IP ranges for API server access"
 }
 
-variable "ingress_application_gateway" {
-  type        = bool
-  default     = false
-  description = "Enable Application Gateway Ingress Controller"
-}
-
-variable "application_gateway_id" {
-  type        = string
-  default     = null
-  description = "ID of the Application Gateway to use with AGIC"
-}
 
 variable "key_vault_aks_csi" {
   type        = bool
