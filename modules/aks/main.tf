@@ -30,12 +30,6 @@ resource "azurerm_kubernetes_cluster" "aks" {
     dns_service_ip = "10.0.0.10"      # Must be within service_cidr
   }
 
-  dynamic "ingress_application_gateway" {
-    for_each = var.ingress_application_gateway && var.application_gateway_id != null ? [1] : []
-    content {
-      gateway_id = var.application_gateway_id
-    }
-  }
 
   dynamic "key_vault_secrets_provider" {
     for_each = var.key_vault_aks_csi ? [1] : []

@@ -14,12 +14,7 @@ output "aks_subnet_id" {
   description = "The ID of the AKS subnet"
 }
 
-output "application_gateway_id" {
-  value       = var.create_application_gateway ? azurerm_application_gateway.app_gateway[0].id : null
-  description = "The ID of the Application Gateway"
-}
-
-output "application_gateway_name" {
-  value       = var.create_application_gateway ? azurerm_application_gateway.app_gateway[0].name : null
-  description = "The name of the Application Gateway"
+output "secondary_subnet_id" {
+  value       = azurerm_subnet.secondary_subnet.id
+  description = "The ID of the secondary subnet"
 }

@@ -16,7 +16,7 @@ variable "cluster_name" {
 
 variable "create_application_gateway" {
   type        = bool
-  default     = true
+  default     = false
   description = "Whether to create an Application Gateway"
 }
 
